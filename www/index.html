@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BIM 360 Notifier</title>
+  <!-- Common packages: JQuery & Bootstrap -->
+  <link rel="stylesheet" href="/css/libraries/bootstrap.min.css"/>
+  <link rel="stylesheet" href="/css/libraries/jstree/style.css"/>
+  <link rel="stylesheet" href="/css/libraries/intlTelInput.css">
+  <script language="JavaScript" src="/js/libraries/jquery.min.js"></script>
+  <script language="JavaScript" src="/js/libraries/bootstrap.min.js"></script>
+  <script language="JavaScript" src="/js/libraries/jstree.min.js"></script>
+  <script language="JavaScript" src="/js/libraries/moment.min.js"></script>
+  <script language="JavaScript" src="/js/libraries/notify.min.js"></script>
+  <script language="JavaScript" src="/js/libraries/clipboard.min.js"></script>
+  <script language="JavaScript" src="/js/libraries/intlTelInput.js"></script>
+  <!-- favicon -->
+  <link rel="shortcut icon" href=/favicon.ico type=image/x-icon>
+  <!-- -->
+  <link rel="stylesheet" href="/css/main.css"/>
+  <script language="JavaScript" src="/js/main.js"></script>
+  <script language="JavaScript" src="/js/autodesk.tree.js"></script>
+</head>
+<body>
+<header>
+  <img alt="Autodesk BIM 360™" src="/img/bim360.png" height="40">
+  <img id="storageIcon" height="40">
+  BIM 360 Notifier
+  <div style="float: right">
+    <span style="padding-right: 20px;" class="mlink" data-toggle="modal" data-target="#provisionAccountModal"
+          title="About, Contact us & Instructions"><span class="glyphicon glyphicon-cog glyphiconTop mlink"> </span> Config</span>
+    <span style="padding-right: 20px;" class="mlink" data-toggle="modal" data-target="#about"
+          title="About, Contact us & Instructions"><span class="glyphicon glyphicon-info-sign glyphiconTop "></span> About</span>
+    <!--<span class="glyphicon glyphicon-question-sign glyphiconTop mlink" title="Instructions" data-toggle="modal" data-target="#about"></span>-->
+  </div>
+</header>
+<div class="container">
+  <div class="row">
+    <div class="cell cell-side cell-left" id="autodeskSide">
+      <button class="btn btn-lg btn-default" id="autodeskSigninButton"><img src="/img/autodesk_text.png" height="20">
+        Sign in
+      </button>
+    </div>
+    <div class="cell cell-center" id="messageSelection">
+      <h3 class="text-center">Files &amp; Versions</h3>
+      <ul id="versionevents" class="list-group checked-list-box">
+        <li class="list-group-item">Added</li>
+        <li class="list-group-item" data-color="success">Modified</li>
+        <li class="list-group-item" data-color="info">Copied</li>
+        <li class="list-group-item" data-color="warning">Moved</li>
+        <li class="list-group-item" data-color="danger">Deleted</li>
+      </ul>
+      <h3 class="text-center">Folders</h3>
+      <ul id="foldersevents" class="list-group checked-list-box">
+        <li class="list-group-item">Added</li>
+        <li class="list-group-item" data-color="success">Modified</li>
+        <li class="list-group-item" data-color="info">Copied</li>
+        <li class="list-group-item" data-color="warning">Moved</li>
+        <li class="list-group-item" data-color="danger">Deleted</li>
+      </ul>
+    </div>
+    <div class="cell cell-side" id="notificationProviders">
+      <div class="panel panel-default notificationPanel">
+        <div class="panel-heading">
+          <label><input type="checkbox" checked value="sms">
+            <span class="glyphicon glyphicon-phone"></span>
+          SMS notification</label>
+        </div>
+        <div class="panel-body">
+          <input type="tel" id="phone">
+        </div>
+      </div>
+      <div class="panel panel-default notificationPanel">
+        <div class="panel-heading">
+          <label><input type="checkbox" checked value="email">
+            <span class="glyphicon glyphicon-envelope"></span>
+          Email notification
+          </label>
+        </div>
+        <div class="panel-body">
+          <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal list files to transfer -->
+<div class="modal fade" id="modalFilesToTransfer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cancel"><span
+            aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Preparing to transfer the following files:</h4>
+      </div>
+      <div class="modal-body">
+        <div id="divListFilesToTransfer"></div>
+        <div id="divListFilesFooter"></div>
+      </div>
+      <div class="modal-footer">
+        <!--<button type="button" class="btn btn-default" data-dismiss="modal" id="cancelTransfer">Cancel</button>-->
+        <button type="button" class="btn btn-primary" id="transferFiles">Start transfer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Provision BIM360  -->
+<div class="modal fade" id="provisionAccountModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cancel"><span
+            aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Thanks for using BIM 360 File Sharing!</h4>
+      </div>
+      <div class="modal-body">
+        <p>To view your BIM 360 Docs files on this app please authorize my Forge Client ID with your BIM 360 Docs
+          Account.</p>
+        <p>
+          <button type="button" class="btn btn-info" data-toggle="modal" data-target="#provisionAccountStepsModal">
+            Show
+            me the steps <span class="glyphicon glyphicon-new-window"></span></button>
+        </p>
+        Use this as Forge Client ID:
+        <div class="input-group">
+          <input type="text" readonly="true" aria-describedby="CopyClientID" id="ClientID" class="form-control"
+                 value=""/>
+          <span class="input-group-addon" style="cursor: pointer" data-clipboard-target="#ClientID" id="CopyClientID">Copy to clipboard</span>
+        </div>
+        And this App Name:
+        <div class="input-group">
+          <input type="text" readonly="true" aria-describedby="CopyAppName" id="AppName" class="form-control"
+                 value="BIM 360 File Sharing"/>
+          <span class="input-group-addon" style="cursor: pointer" data-clipboard-target="#AppName" id="CopyAppName">Copy to clipboard</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="provisionAccountSave">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Provision BIM360 Help  -->
+<div class="modal fade" id="provisionAccountStepsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cancel"><span
+            aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel1">Step-by-step guide</h4>
+      </div>
+      <div class="modal-body">
+        <p>To access your BIM 360 Docs files with this app, you need to connect your BIM 360 account with the app.</p>
+        <ol>
+          <li>Log in to <a href="https://bim360enterprise.autodesk.com/" target="_blank">BIM 360 Account
+            Administration</a>. Note that you need account administrator permissions.
+          </li>
+          <li>If you have more than one account, select the account you want to integrate with the app.</li>
+          <li>From the toolbar, select <strong>SETTINGS &gt; Apps &amp; Integrations</strong>.<br/>
+            <img src="/img/provisioning/Step1.png" width="500"/></li>
+          <li>Click the <strong>Add Integration</strong> button.<br/>
+            <img src="/img/provisioning/Step2.png"/>
+          </li>
+          <li>Select <strong>BIM 360 Account Administration</strong> and <strong>BIM 360 Docs</strong>, and click
+            <strong>Next</strong>.
+          </li>
+          <li>Select <strong>I’m the developer</strong>, and click <strong>Next</strong>.</li>
+          <li>In the <strong>Forge Client ID</strong> and <strong>App Name</strong> fields, enter the Forge client ID
+            and app name provided by the app retailer.
+          </li>
+          <li>Select the <strong>I have saved the Account ID information securely</strong> checkbox.</li>
+          <li>Click <strong>Save</strong>.</br>
+            <img src="/img/provisioning/Step3.png" width="500"/>
+          </li>
+          <p></p>
+          <p>Congratulations! You can now access your BIM 360 Docs files.</p>
+        </ol>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Understood, thanks!</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  new Clipboard('.input-group-addon');
+</script>
+
+
+<!-- About  -->
+<div class="modal fade" id="about" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cancel"><span
+            aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">About, Contact and Instructions</h4>
+      </div>
+      <div class="modal-body">
+        <h4>About</h4>
+        <p>Developed by <a href="http://developer.autodesk.com">Forge Partner Development</a> team at Autodesk, Inc.</p>
+        <p>Get the <a href="https://github.com/autodesk-forge/bim360appstore-data.management-nodejs-transfer.storage"
+                      target="_blank">source code</a>.</p>
+        <h4>Contact us</h4>
+        <p>Question? Suggestions? <a href="mailto:bim360apps@autodesk.com">Contact us</a> directly or see our <a
+            href="https://github.com/autodesk-forge/bim360appstore-data.management-nodejs-transfer.storage/issues"
+            target="_blank">open issues</a>.</p>
+        <h4>Instructions</h4>
+        <ol>
+          <li>You need accounts on both <img src="/img/autodesk_text.png" height="15"> and <img id="storageLogoHelp"
+                                                                                                height="15"></li>
+          <li><strong>Sign in</strong> using the buttons on each side.</li>
+          <li>Select <strong>files</strong> or <strong>folders</strong> you want to transfer, on either side, then
+            select a destination <strong>folder</strong> on the opposite side.
+          </li>
+          <ul>
+            <li>On <strong>Autodesk</strong> side, files are organized as follows:</li>
+            <li>&nbsp;<img src="/img/bim360hub.png"> &nbsp;<a href="https://bim360docs.autodesk.com" target="_blank">BIM
+              360 Docs</a> and <img src="/img/bim360project.png"> projects
+            </li>
+            <li><img src="/img/a360hub.png"> <a href="https://myhub.autodesk360.com" target="_blank">BIM 360 Team</a>
+              (formely A360) and <img src="/img/a360project.png"> projects
+            </li>
+            <li>Inside <span class="glyphicon glyphicon-folder-open"></span> folders, a <span
+                class="glyphicon glyphicon-file"></span>file may have multiple <span
+                class="glyphicon glyphicon-time"></span> versions.
+            </li>
+            <li>Note you can select a specific version to transfer, or select a file to transfer the last version.</li>
+          </ul>
+          <li>Click on the arrow indicating the direction of transfer:
+            <button type="button" class="btn btn-xs btn-default"><span class="glyphicon glyphicon-arrow-left"></span>
+            </button>
+            or
+            <button type="button" class="btn btn-xs btn-default"><span class="glyphicon glyphicon-arrow-right"></span>
+            </button>
+          </li>
+          <li>Confirm the list of files to transfer, use checkboxes to unselect a file, if needed. It may take a few
+            moments to populate, depending on how many files on selected folders. Be patient.
+          </li>
+          <li>Click <strong>Start transfer</strong> and wait until is <strong>Done</strong>. Transferring happens on the
+            background (between servers).
+          </li>
+          <li>The list of files at destination will refresh when completed.</li>
+        </ol>
+        <center>
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/zD1gFELz-2E" frameborder="0"
+                  allowfullscreen></iframe>
+        </center>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

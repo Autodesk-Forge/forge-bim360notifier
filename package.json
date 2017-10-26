@@ -1,0 +1,36 @@
+{
+  "name": "data.management-nodejs-webhook",
+  "version": "1.0.0",
+  "description": "",
+  "main": "start.js",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "bootstrap": "^3.3.7",
+    "cookie-parser": "^1.4.3",
+    "cookie-session": "^2.0.0-beta.3",
+    "express": "^4.16.2",
+    "express-session": "^1.15.6",
+    "forge-apis": "^0.4.1",
+    "intl-tel-input": "^12.1.2",
+    "jquery": "^3.2.1",
+    "jstree": "^3.3.4",
+    "moment": "^2.19.1",
+    "node-html-encoder": "0.0.2",
+    "request": "^2.83.0",
+    "twilio": "^3.9.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/augustogoncalves/data.management-nodejs-webhook.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/augustogoncalves/data.management-nodejs-webhook/issues"
+  },
+  "homepage": "https://github.com/augustogoncalves/data.management-nodejs-webhook#readme"
+}

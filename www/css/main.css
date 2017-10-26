@@ -1,0 +1,150 @@
+html, body, .container {
+    height: 100%;
+    overflow: hidden;
+}
+
+.container {
+    display: table;
+    width: 100%;
+    margin-top: -50px;
+    padding:20px 0 0 0; /*set left/right padding according to needs*/
+    box-sizing: border-box;
+}
+
+header {
+    background: #F1FAFD;
+    height: 50px;
+    padding: 5px;
+    border-bottom: solid 1px #C0C0C0;
+}
+
+.row {
+    height: 100%;
+    display: table-row;
+}
+
+.row .cell {
+    display: table-cell;
+    float: none;
+    padding: 5px;
+    vertical-align: middle;
+}
+
+.cell-center {
+    /*background: #F1FAFD;*/
+    width: 300px;
+    vertical-align: middle;
+}
+
+.cell-side{
+    width: calc(50vw - 150px);
+}
+
+.cell-left {
+    text-align: center;
+}
+
+.tree {
+    overflow: auto;
+    height: calc(100vh - 100px);
+    width: calc(50vw - 150px);
+    position: absolute;
+}
+
+.treeTitle {
+    border-bottom: 1px solid #C0C0C0;
+    padding-bottom: 3px
+}
+
+.mlink {
+    cursor: pointer;
+}
+
+.refreshIcon {
+    vertical-align: top;
+    float: right;
+    margin-top: 5px;
+    margin-left: 10px;
+}
+
+.transferItem {
+    min-width: 100%;
+    white-space: nowrap;
+}
+
+.profilePicture {
+    width: 30px;
+    height: 30px;
+    background: url(/img/avatar.png) no-repeat scroll;
+}
+
+.modal-dialog {
+    min-width: 800px;
+}
+
+.storageIcon {
+    padding-right: 5px;
+    vertical-align: text-top;
+}
+
+.glyphiconTop {
+    /*font-size: 1.5em;*/
+    color: #a0a0a0;
+    padding-top: 6px;
+}
+
+.notifyjs-newFolderNotify-base {
+    opacity: 1;
+    width: 270px;
+    background: #FCF8E3;
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid #FBEED5;
+    color: #C09853;
+}
+
+.notifyjs-newFolderNotify-base .title {
+    width: 100px;
+    float: left;
+    margin: 10px 0 0 10px;
+}
+
+.notifyjs-newFolderNotify-base .buttons {
+    width: 110px;
+    float: right;
+    font-size: 9px;
+    padding: 5px;
+    margin: 2px;
+}
+
+.notifyjs-newFolderNotify-base button {
+    padding: 5px;
+    margin: 2px;
+    width: 100px;
+}
+
+.notificationPanel{
+    max-width:400px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+/* CSS REQUIRED */
+.state-icon {
+    left: -5px;
+}
+.list-group-item-primary {
+    color: rgb(255, 255, 255);
+    background-color: rgb(66, 139, 202);
+}
+
+/* DEMO ONLY - REMOVES UNWANTED MARGIN */
+.well .list-group {
+    margin-bottom: 0px;
+}
+
+.iti-flag {background-image: url("/img/libraries/flags.png");}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min--moz-device-pixel-ratio: 2), only screen and (-o-min-device-pixel-ratio: 2 / 1), only screen and (min-device-pixel-ratio: 2), only screen and (min-resolution: 192dpi), only screen and (min-resolution: 2dppx) {
+    .iti-flag {background-image: url("/img/libraries/flags@2x.png");}
+}
