@@ -19,6 +19,7 @@
   <!-- -->
   <link rel="stylesheet" href="/css/main.css"/>
   <script language="JavaScript" src="/js/main.js"></script>
+  <script language="JavaScript" src="/js/notifications.js"></script>
   <script language="JavaScript" src="/js/autodesk.tree.js"></script>
 </head>
 <body>
@@ -41,25 +42,25 @@
         Sign in
       </button>
     </div>
-    <div class="cell cell-center" id="messageSelection">
+    <div class="cell cell-center" id="messageSelection" style="visibility: hidden">
       <h3 class="text-center">Files &amp; Versions</h3>
       <ul id="versionevents" class="list-group checked-list-box">
-        <li class="list-group-item">Added</li>
-        <li class="list-group-item" data-color="success">Modified</li>
-        <li class="list-group-item" data-color="info">Copied</li>
-        <li class="list-group-item" data-color="warning">Moved</li>
-        <li class="list-group-item" data-color="danger">Deleted</li>
+        <li class="list-group-item" id="fs.file.added">Added</li>
+        <li class="list-group-item" id="fs.file.modified" data-color="success">Modified</li>
+        <li class="list-group-item" id="fs.file.copied" data-color="info">Copied</li>
+        <li class="list-group-item" id="fs.file.moved" data-color="warning">Moved</li>
+        <li class="list-group-item" id="fs.file.deleted" data-color="danger">Deleted</li>
       </ul>
       <h3 class="text-center">Folders</h3>
       <ul id="foldersevents" class="list-group checked-list-box">
-        <li class="list-group-item">Added</li>
-        <li class="list-group-item" data-color="success">Modified</li>
-        <li class="list-group-item" data-color="info">Copied</li>
-        <li class="list-group-item" data-color="warning">Moved</li>
-        <li class="list-group-item" data-color="danger">Deleted</li>
+        <li class="list-group-item" id="fs.folder.added">Added</li>
+        <li class="list-group-item" id="fs.folder.modified" data-color="success">Modified</li>
+        <li class="list-group-item" id="fs.folder.copied" data-color="info">Copied</li>
+        <li class="list-group-item" id="fs.folder.moved" data-color="warning">Moved</li>
+        <li class="list-group-item" id="fs.folder.deleted" data-color="danger">Deleted</li>
       </ul>
     </div>
-    <div class="cell cell-side" id="notificationProviders">
+    <div class="cell cell-side" id="notificationProviders" style="visibility: hidden;">
       <div class="panel panel-default notificationPanel">
         <div class="panel-heading">
           <label><input type="checkbox" checked value="sms">
@@ -81,25 +82,8 @@
           <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
         </div>
       </div>
-    </div>
-  </div>
-</div>
-<!-- Modal list files to transfer -->
-<div class="modal fade" id="modalFilesToTransfer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Cancel"><span
-            aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Preparing to transfer the following files:</h4>
-      </div>
-      <div class="modal-body">
-        <div id="divListFilesToTransfer"></div>
-        <div id="divListFilesFooter"></div>
-      </div>
-      <div class="modal-footer">
-        <!--<button type="button" class="btn btn-default" data-dismiss="modal" id="cancelTransfer">Cancel</button>-->
-        <button type="button" class="btn btn-primary" id="transferFiles">Start transfer</button>
+      <div class="cell-left">
+      <button type="button" class="btn btn-primary" id="createNotifications">Create notifications</button>
       </div>
     </div>
   </div>
@@ -112,7 +96,7 @@
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Cancel"><span
             aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Thanks for using BIM 360 File Sharing!</h4>
+        <h4 class="modal-title">Thanks for using BIM 360 Notifier!</h4>
       </div>
       <div class="modal-body">
         <p>To view your BIM 360 Docs files on this app please authorize my Forge Client ID with your BIM 360 Docs
@@ -131,7 +115,7 @@
         And this App Name:
         <div class="input-group">
           <input type="text" readonly="true" aria-describedby="CopyAppName" id="AppName" class="form-control"
-                 value="BIM 360 File Sharing"/>
+                 value="BIM 360 Notifier"/>
           <span class="input-group-addon" style="cursor: pointer" data-clipboard-target="#AppName" id="CopyAppName">Copy to clipboard</span>
         </div>
       </div>

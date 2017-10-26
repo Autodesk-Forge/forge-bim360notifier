@@ -25,19 +25,16 @@ var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json();
 
 // app config settings
-var config = require('./config');
+var config = require('./../config');
 
-router.get('/api/forge/clientID', function (req, res) {
-  res.json({
-    'ForgeClientId': config.forge.credentials.client_id
-  });
+router.post('/api/forge/createHook', jsonParser, function (req, res) {
+  var events = req.body.events;
+  var folderId = req.body.folderId;
+
+  var sms = req.body.sms;
+  var email = req.body.email;
+
+  res.status(200).end();
 });
-
-router.get('/api/app/logoff', function (req, res) {
-  req.session = null;
-  res.writeHead(301, {Location: '/'});
-  res.end();
-});
-
 
 module.exports = router;

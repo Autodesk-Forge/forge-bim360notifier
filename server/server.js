@@ -66,8 +66,10 @@ app.set('port', process.env.PORT || 3000); // main port
 // prepare our API endpoint routing
 var forgeOAuth = require('./forge/oauth.js');
 var forgeTree = require('./forge/tree.js');
+var forgeHooks = require('./forge/hook.js');
 app.use('/', forgeOAuth); // redirect oauth API calls
 app.use('/', forgeTree); // redirect our custom API calls
+app.use('/', forgeHooks); // redirect our custom API calls
 
 var appSettings = require('./appSettings.js');
 app.use('/', appSettings);
