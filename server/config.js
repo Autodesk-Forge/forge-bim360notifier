@@ -31,9 +31,6 @@ module.exports = {
       client_secret: process.env.FORGE_CLIENT_SECRET || '<replace with your consumer secret>'
     },
 
-    eventsAllowed: [
-      ['File version added', 'fs.file.added'],
-      ['File version modified', 'fs.file.modified']
-    ]
+    hookCallbackHost : process.env.FORGE_HOOK_CALLBACK_HOST
   }
 };

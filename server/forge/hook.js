@@ -27,7 +27,10 @@ var jsonParser = bodyParser.json();
 // app config settings
 var config = require('./../config');
 
-router.post('/api/forge/createHook', jsonParser, function (req, res) {
+// this is the endpoint that will be exposed
+var hookCallbackEntpoint = '/api/forge/hook/callback';
+
+router.post('/api/forge/hook', jsonParser, function (req, res) {
   var events = req.body.events;
   var folderId = req.body.folderId;
 
@@ -35,6 +38,10 @@ router.post('/api/forge/createHook', jsonParser, function (req, res) {
   var email = req.body.email;
 
   res.status(200).end();
+});
+
+router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
+
 });
 
 module.exports = router;

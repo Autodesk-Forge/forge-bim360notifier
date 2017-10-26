@@ -19,7 +19,7 @@ function createNotifications() {
   }
 
   $.ajax({
-    url: '/api/forge/createHook',
+    url: '/api/forge/hook',
     contentType: 'application/json',
     type: 'POST',
     //dataType: 'json', comment this to avoid parsing the response which would result in an error
