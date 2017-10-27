@@ -40,5 +40,12 @@ module.exports = {
       token:  process.env.TWILIO_TOKEN
     },
     fromNumber:  process.env.TWILIO_FROM_NUMER
+  },
+
+  postmark: {
+    credentials: {
+      accountId: process.env.POSTMARK_ACCOUNT_ID
+    },
+    fromEmail: process.env.POSTMARK_FROM_EMAIL
   }
 };

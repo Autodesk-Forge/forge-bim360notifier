@@ -26,6 +26,7 @@ var jsonParser = bodyParser.json();
 var request = require('request');
 var async = require('async');
 var twilio = require('twilio');
+var postmark = require("postmark");
 
 // app config settings
 var config = require('./../config');
@@ -111,20 +112,36 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
   var eventParams = hook.eventType.split('.');
   var itemType = eventParams[1];
   var eventName = eventParams[2];
-  var smsMsg = 'BIM360 Notifier: ' + itemType + ' ' + payload.name + ' was ' + eventName + ' to ' + payload.ancestors[1].name;
+
+  var message = 'BIM360 Notifier: ' + itemType + ' ' + payload.name + ' was ' + eventName + ' to ' + payload.ancestors[1].name;
 
   // SMS Notification
-  var client = new twilio(config.twilio.credentials.accountSid, config.twilio.credentials.token);
-
-  client.messages.create({
-    body: smsMsg,
-    to: hook.hookAttribute.sms,
-    from: config.twilio.fromNumber
-  }, function (err, result) {
-    console.log(hook.hookAttribute.sms + ': ' + smsMsg + ' => ' + result.status);
-  });
+  if (hook.hookAttribute.sms && config.twilio.credentials.accountSid) {
+    var client = new twilio(config.twilio.credentials.accountSid, config.twilio.credentials.token);
+    client.messages.create({
+      body: message,
+      to: hook.hookAttribute.sms,
+      from: config.twilio.fromNumber
+    }, function (err, result) {
+      console.log(hook.hookAttribute.sms + ': ' + message + ' => ' + result.status);
+    });
+  }
 
   // Email notification
+  if (hook.hookAttribute.email) {
+    var client = new postmark.Client(config.postmark.credentials.accountId);
+
+    client.sendEmail({
+      "From": config.postmark.fromEmail,
+      "To": hook.hookAttribute.email,
+      "Subject": "BIM 360 Notifier",
+      "TextBody": message
+    }).then(function(res){
+      console.log(hook.hookAttribute.email + ': ' + message + ' => ' + res.Message);
+    }).catch(function(err){
+      console.log(err);
+    });
+  }
 
   res.status(200).end();
 });
