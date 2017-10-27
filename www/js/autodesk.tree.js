@@ -85,8 +85,12 @@ function prepareAutodeskTree() {
       }
 
     },
-    "plugins": ["types", "state", "sort"],
+    "plugins": ["types", "state", "search", "sort"],
     "state": {"key": "autodeskTree"}
+  }).bind("activate_node.jstree", function (evt, data) {
+    if (data != null && data.node != null && data.node.type=='folders') {
+      showEvents(data.node.id);
+    }
   });
 
   $('#refreshAutodeskTree').click(function () {

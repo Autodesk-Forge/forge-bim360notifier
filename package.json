@@ -4,6 +4,7 @@
   "description": "",
   "main": "start.js",
   "dependencies": {
+    "async": "^2.5.0",
     "body-parser": "^1.18.2",
     "bootstrap": "^3.3.7",
     "cookie-parser": "^1.4.3",

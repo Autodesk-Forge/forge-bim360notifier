@@ -37,3 +37,30 @@ function createNotifications() {
     }
   });
 }
+
+function showEvents(folderId) {
+  var params = folderId.split('/');
+  if (params.length > 0)
+    folderId = params[params.length - 1];
+
+  $.ajax({
+    url: '/api/forge/hook/' + folderId,
+    contentType: 'application/json',
+    type: 'GET',
+    success: function (hook) {
+      if (!hook) return;
+
+      $('.list-group.checked-list-box').each(function () {
+        $(this).find('li').each(function () {
+          if (hook.events.contains(this.id))
+            this.addClass('.active');
+        });
+      });
+      $('#phone').val(hook.sms);
+      $('#email').val(hook.email);
+    },
+    error: function (res) {
+
+    }
+  });
+}

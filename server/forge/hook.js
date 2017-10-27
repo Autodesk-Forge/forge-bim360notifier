@@ -23,25 +23,168 @@ var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json();
+var request = require('request');
+var async = require('async');
 
 // app config settings
 var config = require('./../config');
+var Credentials = require('./../credentials');
 
 // this is the endpoint that will be exposed
 var hookCallbackEntpoint = '/api/forge/hook/callback';
 
 router.post('/api/forge/hook', jsonParser, function (req, res) {
+  // session with access token
+  var token = new Credentials(req.session);
   var events = req.body.events;
-  var folderId = req.body.folderId;
+  var folderHttp = req.body.folderId;
 
+  // input from user
   var sms = req.body.sms;
   var email = req.body.email;
+  if (!sms && !email) {
+    res.status(400).end();
+    return;
+  }
 
-  res.status(200).end();
+  // extract projectId & folderId from input
+  var params = folderHttp.split('/');
+  var folderId = params[params.length - 1];
+  var projectId = params[params.length - 3];
+
+  // prepare the attributes to create hook
+  var attributes = {
+    events: events,
+    projectId: projectId
+  };
+  if (sms) attributes['sms'] = sms;
+  if (email) attributes['email'] = email;
+
+  var hooks = new WebHooks(token.getForgeCredentials().access_token, folderId);
+
+  hooks.DeleteHooks(function () {
+    hooks.CreateHook(attributes, function () {
+
+    })
+  });
+});
+
+router.get('/api/forge/hook/*', function (req, res) {
+  var params = req.url.split('/');
+  var folderId = params[params.length - 1];
+
+  var token = new Credentials(req.session);
+  var hooks = new WebHooks(token.getForgeCredentials().access_token, folderId);
+
+  hooks.GetHooks(function (hooks) {
+    if (hooks.length==0){
+      res.status(204).end();
+      return;
+    }
+
+    // get all evens for this folder
+    var events = [];
+    hooks.forEach(function (hook) {
+      events.push(hook.eventType);
+    });
+
+    //return to the UI
+    res.status(200).json({
+      sms: hooks[0].hookAttribute.sms,    // all events should have the same sms & email (for this app)
+      email: hooks[0].hookAttribute.email,
+      events: events
+    });
+  });
 });
 
 router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
+  var body = req.body;
 
 });
+
+
+// *****************************
+// WebHook endpoints wrapper
+// *****************************
+
+function WebHooks(accessToken, folderId) {
+  this._accessToken = accessToken;
+  this._folderId = folderId;
+
+  this._url = 'https://developer.api.autodesk.com/webhooks/v1/systems/data';
+}
+
+WebHooks.prototype.GetHooks = function (callback) {
+  // get all hooks for this user
+  request.get({
+    //url : 'https://developer.api.autodesk.com/webhooks/v1/systems/data/events/fs.file.added/hooks',
+    url: this._url + '/hooks',
+    headers: {
+      'Authorization': 'Bearer1 ' + this._accessToken
+    }
+  }, function (error, response) {
+    var hooks = [];
+
+    if (response.statusCode != 200) {
+      callback(hooks);
+      return;
+    }
+
+    response.forEach(function (hook) {
+      if (hook.scope.folder == this._folderId)
+        hooks.push(hook);
+    });
+    callback(hooks);
+  });
+};
+
+WebHooks.prototype.DeleteHooks = function (callback) {
+  this.GetHooks(function (hooks) {
+    var deleteRequests = [];
+    hooks.forEach(function (hook) {
+      deleteRequests.push(function (callback) {
+        request({
+          url: this._url + '/events/' + hook.eventType + '/hooks/' + hook.hookId,
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + this._accessToken
+          }
+        }, function (error, response) {
+          callback(null, hook.eventType);
+        });
+      })
+    });
+
+    // process all delete calls in parallel
+    async.parallel(deleteRequests, function (err, results) {
+      callback(results);
+    })
+  });
+};
+
+WebHooks.prototype.CreateHook = function (attributes, callback) {
+  // this is how the hook will callback
+  var callbackEndpoint = config.forge.hookCallbackHost + hookCallbackEntpoint;
+
+  var requestBody = {
+    callbackUrl: callbackEndpoint,
+    scope: {
+      folder: this._folderId
+    },
+    hookAttribute: attributes
+  };
+
+  request.post({
+    url: this._url + '/hooks',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + this._accessToken
+    },
+    body: JSON.stringify(requestBody)
+  }, function (error, response) {
+    callback((response.statusCode == 200));
+  });
+};
 
 module.exports = router;
