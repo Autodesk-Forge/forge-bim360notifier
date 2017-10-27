@@ -32,5 +32,13 @@ module.exports = {
     },
 
     hookCallbackHost : process.env.FORGE_HOOK_CALLBACK_HOST
+  },
+
+  twilio: {
+    credentials : {
+      accountSid:  process.env.TWILIO_ACCOUNT_SID,
+      token:  process.env.TWILIO_TOKEN
+    },
+    fromNumber:  process.env.TWILIO_FROM_NUMER
   }
 };

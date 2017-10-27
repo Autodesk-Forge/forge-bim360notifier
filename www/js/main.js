@@ -34,6 +34,7 @@ function prepareAutodeskSide() {
       autodeskSide.css("vertical-align", "top");
       autodeskSide.css('text-align', 'left');
       autodeskSide.append(
+        '<h3 class="text-center">1. Select folder:</h3><hr>' +
         '<div class="treeTitle"><img src="" id="autodeskProfilePicture" height="30px" class="profilePicture"> <span id="autodeskProfileName"></span> ' +
         '<span class="glyphicon glyphicon-log-out mlink" title="Sign out" id="autodeskLogoff"> </span>' +
         '<span class="glyphicon glyphicon-refresh refreshIcon mlink" id="refreshAutodeskTree" title="Refresh Autodesk files"/>' +

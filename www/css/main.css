@@ -27,13 +27,13 @@ header {
     display: table-cell;
     float: none;
     padding: 5px;
-    vertical-align: middle;
+
 }
 
 .cell-center {
     /*background: #F1FAFD;*/
     width: 300px;
-    vertical-align: middle;
+    /*vertical-align: middle;*/
 }
 
 .cell-side{
@@ -42,11 +42,12 @@ header {
 
 .cell-left {
     text-align: center;
+    vertical-align: middle;
 }
 
 .tree {
     overflow: auto;
-    height: calc(100vh - 100px);
+    height: calc(100vh - 200px);
     width: calc(50vw - 150px);
     position: absolute;
 }

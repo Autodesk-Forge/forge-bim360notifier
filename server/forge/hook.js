@@ -25,6 +25,7 @@ var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json();
 var request = require('request');
 var async = require('async');
+var twilio = require('twilio');
 
 // app config settings
 var config = require('./../config');
@@ -62,11 +63,11 @@ router.post('/api/forge/hook', jsonParser, function (req, res) {
 
   var hooks = new WebHooks(token.getForgeCredentials().access_token, folderId);
 
-  hooks.DeleteHooks(function () {
-    hooks.CreateHook(attributes, function () {
+  //hooks.DeleteHooks(function () {
+  hooks.CreateHook(attributes, function () {
 
-    })
-  });
+  })
+  //});
 });
 
 router.get('/api/forge/hook/*', function (req, res) {
@@ -77,7 +78,7 @@ router.get('/api/forge/hook/*', function (req, res) {
   var hooks = new WebHooks(token.getForgeCredentials().access_token, folderId);
 
   hooks.GetHooks(function (hooks) {
-    if (hooks.length==0){
+    if (hooks.length == 0) {
       res.status(204).end();
       return;
     }
@@ -98,8 +99,34 @@ router.get('/api/forge/hook/*', function (req, res) {
 });
 
 router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
-  var body = req.body;
+  var hook = req.body.hook;
+  var payload = req.body.payload;
 
+  // check if the current event is one of the events to notifify
+  if (hook.hookAttribute.events.indexOf(hook.eventType) == -1) {
+    res.status(200).end();
+    return;
+  }
+
+  var eventParams = hook.eventType.split('.');
+  var itemType = eventParams[1];
+  var eventName = eventParams[2];
+  var smsMsg = 'BIM360 Notifier: ' + itemType + ' ' + payload.name + ' was ' + eventName + ' to ' + payload.ancestors[1].name;
+
+  // SMS Notification
+  var client = new twilio(config.twilio.credentials.accountSid, config.twilio.credentials.token);
+
+  client.messages.create({
+    body: smsMsg,
+    to: hook.hookAttribute.sms,
+    from: config.twilio.fromNumber
+  }, function (err, result) {
+    console.log(hook.hookAttribute.sms + ': ' + smsMsg + ' => ' + result.status);
+  });
+
+  // Email notification
+
+  res.status(200).end();
 });
 
 
