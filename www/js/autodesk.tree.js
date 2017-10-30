@@ -40,10 +40,6 @@ function prepareAutodeskTree() {
 
           if (!haveBIM360Hub) {
             $("#provisionAccountModal").modal();
-            $("#provisionAccountSave").click(function () {
-              $('#provisionAccountModal').modal('toggle');
-              $('#autodeskTree').jstree(true).refresh();
-            });
             haveBIM360Hub = true;
           }
         }
@@ -100,4 +96,8 @@ function prepareAutodeskTree() {
 
 $.getJSON("/api/forge/clientID", function (res) {
   $("#ClientID").val(res.ForgeClientId);
+  $("#provisionAccountSave").click(function () {
+    $('#provisionAccountModal').modal('toggle');
+    $('#autodeskTree').jstree(true).refresh();
+  });
 });

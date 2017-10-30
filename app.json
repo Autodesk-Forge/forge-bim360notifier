@@ -1,0 +1,46 @@
+{
+  "name": "BIM360.Notifier",
+  "description": "Basic Webhook for Data Management",
+  "repository": "https://github.com/augustogoncalves/data.management-nodejs-webhook",
+  "logo": "https://avatars0.githubusercontent.com/u/8017462?v=3&s=200",
+  "keywords": [
+    "express",
+    "framework",
+    "autodesk",
+    "forge",
+    "template"
+  ],
+  "env": {
+    "FORGE_CLIENT_ID": {
+      "description": "Forge Client ID"
+    },
+    "FORGE_CLIENT_SECRET": {
+      "description": "Forge Client Secret"
+    },
+    "FORGE_CALLBACK_URL": {
+      "description": "Callback URL of your Forge app, required for 3-legged OAuth",
+      "value": "https://<<YOUR HEROKU APP NAME HERE>>.herokuapp.com/api/forge/callback/oauth"
+    },
+    "FORGE_HOOK_CALLBACK_HOST": {
+      "description": "Callback HOST for your application",
+      "value": "https://<<YOUR HEROKU APP NAME HERE>>.herokuapp.com"
+    },
+    "TWILIO_ACCOUNT_SID": {
+      "description": "Twilio API Account SID"
+    },
+    "TWILIO_TOKEN": {
+      "description": "Twilio API Token"
+    },
+    "TWILIO_FROM_NUMER": {
+      "description": "Twilio phone number used to send text messages"
+    },
+    "POSTMARK_ACCOUNT_ID": {
+      "description": "Postmark API Account ID"
+    },
+    "POSTMARK_FROM_EMAIL": {
+      "description": "FROM email used to send emails via Postmark"
+    }
+  },
+  "website": "https://developer.autodesk.com/",
+  "success_url": "/"
+}

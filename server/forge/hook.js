@@ -113,7 +113,7 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
   var itemType = eventParams[1];
   var eventName = eventParams[2];
 
-  var message = 'BIM360 Notifier: ' + itemType + ' ' + payload.name + ' was ' + eventName + ' to ' + payload.ancestors[1].name;
+  var message = 'BIM360 Notifier: ' + itemType + ' ' + payload.name + ' was ' + eventName + ' on project ' + payload.ancestors[1].name;
 
   // SMS Notification
   if (hook.hookAttribute.sms && config.twilio.credentials.accountSid) {
