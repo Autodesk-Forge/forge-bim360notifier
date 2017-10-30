@@ -68,8 +68,8 @@ function showEvents(folderId) {
           }
         });
       });
-      $('#phone').intlTelInput("setNumber",hook.sms);
-      $('#email').val(hook.email);
+      if (hook.sms) $('#phone').intlTelInput("setNumber",hook.sms);
+      if (hook.email) $('#email').val(hook.email);
     },
     error: function (res) {
 
