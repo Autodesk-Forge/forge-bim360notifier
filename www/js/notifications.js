@@ -30,7 +30,7 @@ function createNotifications() {
       'email': $('#email').val()
     }),
     success: function (res) {
-
+      console.log(res);
     },
     error: function (res) {
 
@@ -48,15 +48,27 @@ function showEvents(folderId) {
     contentType: 'application/json',
     type: 'GET',
     success: function (hook) {
+      // clear
+      $('.list-group.checked-list-box').each(function () {
+        $(this).find('li').each(function () {
+            $(this).removeClass('list-group-item-primary').removeClass('active');
+            $(this).find('span').removeClass('glyphicon-check').addClass(' glyphicon-unchecked')
+        });
+      });
+      $('#phone').val('');
+      $('#email').val('');
+
       if (!hook) return;
 
       $('.list-group.checked-list-box').each(function () {
         $(this).find('li').each(function () {
-          if (hook.events.contains(this.id))
-            this.addClass('.active');
+          if (hook.events.includes(this.id)) {
+            $(this).addClass(' list-group-item-primary active');
+            $(this).find('span').removeClass(' glyphicon-unchecked').addClass(' glyphicon-check')
+          }
         });
       });
-      $('#phone').val(hook.sms);
+      $('#phone').intlTelInput("setNumber",hook.sms);
       $('#email').val(hook.email);
     },
     error: function (res) {

@@ -64,11 +64,11 @@ router.post('/api/forge/hook', jsonParser, function (req, res) {
 
   var hooks = new WebHooks(token.getForgeCredentials().access_token, folderId);
 
-  //hooks.DeleteHooks(function () {
-  hooks.CreateHook(attributes, function () {
-
-  })
-  //});
+  hooks.DeleteHooks(function () {
+    hooks.CreateHook(attributes, function (status) {
+      res.status(200).json(status);
+    })
+  });
 });
 
 router.get('/api/forge/hook/*', function (req, res) {
@@ -136,9 +136,9 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
       "To": hook.hookAttribute.email,
       "Subject": "BIM 360 Notifier",
       "TextBody": message
-    }).then(function(res){
+    }).then(function (res) {
       console.log(hook.hookAttribute.email + ': ' + message + ' => ' + res.Message);
-    }).catch(function(err){
+    }).catch(function (err) {
       console.log(err);
     });
   }
@@ -160,11 +160,12 @@ function WebHooks(accessToken, folderId) {
 
 WebHooks.prototype.GetHooks = function (callback) {
   // get all hooks for this user
+  var self = this;
   request.get({
     //url : 'https://developer.api.autodesk.com/webhooks/v1/systems/data/events/fs.file.added/hooks',
     url: this._url + '/hooks',
     headers: {
-      'Authorization': 'Bearer1 ' + this._accessToken
+      'Authorization': 'Bearer ' + this._accessToken
     }
   }, function (error, response) {
     var hooks = [];
@@ -174,8 +175,9 @@ WebHooks.prototype.GetHooks = function (callback) {
       return;
     }
 
-    response.forEach(function (hook) {
-      if (hook.scope.folder == this._folderId)
+    var list = JSON.parse(response.body);
+    list.forEach(function (hook) {
+      if (hook.scope.folder === self._folderId/* && hook.hookAttribute.events.indexOf(hook.eventType)>-1*/)
         hooks.push(hook);
     });
     callback(hooks);
@@ -183,19 +185,20 @@ WebHooks.prototype.GetHooks = function (callback) {
 };
 
 WebHooks.prototype.DeleteHooks = function (callback) {
+  var self = this;
   this.GetHooks(function (hooks) {
     var deleteRequests = [];
     hooks.forEach(function (hook) {
       deleteRequests.push(function (callback) {
         request({
-          url: this._url + '/events/' + hook.eventType + '/hooks/' + hook.hookId,
+          url: self._url + '/events/' + hook.eventType + '/hooks/' + hook.hookId,
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + this._accessToken
+            'Authorization': 'Bearer ' + self._accessToken
           }
         }, function (error, response) {
-          callback(null, hook.eventType);
+          callback(null, (response.status == 24 ? hook.eventType : null));
         });
       })
     });
@@ -219,16 +222,42 @@ WebHooks.prototype.CreateHook = function (attributes, callback) {
     hookAttribute: attributes
   };
 
-  request.post({
-    url: this._url + '/hooks',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + this._accessToken
-    },
-    body: JSON.stringify(requestBody)
-  }, function (error, response) {
-    callback((response.statusCode == 200));
-  });
+  /*
+   request.post({
+   url: this._url + '/hooks',
+   headers: {
+   'Content-Type': 'application/json',
+   'Authorization': 'Bearer ' + this._accessToken
+   },
+   body: JSON.stringify(requestBody)
+   }, function (error, response) {
+   callback((response.statusCode == 201));
+   });*/
+
+
+  var self = this;
+  var createEvents = [];
+  var events = attributes.events.split(',');
+  events.forEach(function (event) {
+    createEvents.push(function (callback) {
+      request({
+        url: self._url + '/events/' + event + '/hooks',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + self._accessToken
+        },
+        body: JSON.stringify(requestBody)
+      }, function (error, response) {
+        callback(null, (response.statusCode == 201 ? event : null));
+      });
+    })
+  })
+
+  // process all delete calls in parallel
+  async.parallel(createEvents, function (err, results) {
+    callback(results);
+  })
 };
 
 module.exports = router;
