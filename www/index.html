@@ -66,7 +66,7 @@
       <h3 class="text-center">3. Contact information:</h3>
       <hr>
       <div class="panel panel-default notificationPanel">
-        <div class="panel-heading">
+        <div class="panel-heading panelTwilio">
           <label><!--<input type="checkbox" checked value="sms">-->
             <span class="glyphicon glyphicon-phone"></span>
             SMS notification</label>
@@ -76,7 +76,7 @@
         </div>
       </div>
       <div class="panel panel-default notificationPanel">
-        <div class="panel-heading">
+        <div class="panel-heading panelPostmark">
           <label><!--<input type="checkbox" checked value="email">-->
             <span class="glyphicon glyphicon-envelope"></span>
             Email notification
@@ -86,6 +86,17 @@
           <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
         </div>
       </div>
+      <!--<div class="panel panel-default notificationPanel">
+        <div class="panel-heading panelSlack">
+          <label>
+            <span class="glyphicon glyphicon-comment"></span>
+            Slack notification
+          </label>
+        </div>
+        <div class="panel-body">
+          <input type="email" class="form-control" id="slackchannel" placeholder="Enter channel name" name="slackchannel">
+        </div>
+      </div>-->
       <div class="cell-left"><br/><br/><br/>
         <button type="button" class="btn btn-lg btn-primary" id="createNotifications">
           Create notification

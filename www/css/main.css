@@ -61,6 +61,33 @@ header {
     cursor: pointer;
 }
 
+.panelTwilio{
+    background: url('/img/twilio.png');
+    background-size: 100px;
+    background-repeat: no-repeat;
+    background-position-x: right;
+    background-position-y: center;
+    background-color: #f5f5f5;
+}
+
+.panelPostmark{
+    background: url('https://postmarkapp.com/images/logo.svg?dacebab634');
+    background-size: 100px;
+    background-repeat: no-repeat;
+    background-position-x: right;
+    background-position-y: center;
+    background-color: #f5f5f5;
+}
+
+.panelSlack{
+    background: url('/img/slack.png');
+    background-size: 100px;
+    background-repeat: no-repeat;
+    background-position-x: right;
+    background-position-y: center;
+    background-color: #f5f5f5;
+}
+
 .refreshIcon {
     vertical-align: top;
     float: right;
