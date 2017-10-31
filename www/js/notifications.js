@@ -27,10 +27,14 @@ function createNotifications() {
       'events': events.join(','),
       'folderId': autodeskNode.id,
       'sms': $('#phone').val(),
-      'email': $('#email').val()
+      'email': $('#email').val(),
+      'slack': $('#slackchannel').val()
     }),
     success: function (res) {
       console.log(res);
+      res.forEach(function(event){
+        $.notify("Hook created: " + event, "success");
+      });
     },
     error: function (res) {
 
@@ -57,6 +61,8 @@ function showEvents(folderId) {
       });
       $('#phone').val('');
       $('#email').val('');
+      $('#slackchannel').val('');
+      $('#createNotifications').html('Create notification');
 
       if (!hook) return;
 
@@ -70,6 +76,8 @@ function showEvents(folderId) {
       });
       if (hook.sms) $('#phone').intlTelInput("setNumber",hook.sms);
       if (hook.email) $('#email').val(hook.email);
+      if (hook.slack) $('#slackchannel').val(hook.slack);
+      $('#createNotifications').html('Update notification');
     },
     error: function (res) {
 

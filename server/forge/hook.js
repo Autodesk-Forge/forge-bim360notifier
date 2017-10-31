@@ -44,7 +44,8 @@ router.post('/api/forge/hook', jsonParser, function (req, res) {
   // input from user
   var sms = req.body.sms;
   var email = req.body.email;
-  if (!sms && !email) {
+  var slack = req.body.slack;
+  if (!sms && !email && !slack) {
     res.status(400).end();
     return;
   }
@@ -61,6 +62,7 @@ router.post('/api/forge/hook', jsonParser, function (req, res) {
   };
   if (sms) attributes['sms'] = sms;
   if (email) attributes['email'] = email;
+  if (slack) attributes['slack'] = slack;
 
   var hooks = new WebHooks(token.getForgeCredentials().access_token, folderId);
 
@@ -94,6 +96,7 @@ router.get('/api/forge/hook/*', function (req, res) {
     res.status(200).json({
       sms: hooks[0].hookAttribute.sms,    // all events should have the same sms & email (for this app)
       email: hooks[0].hookAttribute.email,
+      slack: hooks[0].hookAttribute.slack,
       events: events
     });
   });
@@ -140,6 +143,15 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
       console.log(hook.hookAttribute.email + ': ' + message + ' => ' + res.Message);
     }).catch(function (err) {
       console.log(err);
+    });
+  }
+
+  // slack notification
+  if (hook.hookAttribute.slack){
+    request.post({
+      'url' : 'https://hooks.slack.com/services/' + hook.hookAttribute.slack,
+      'Content-Type': 'application/json',
+      'body' : JSON.stringify({text: message})
     });
   }
 
