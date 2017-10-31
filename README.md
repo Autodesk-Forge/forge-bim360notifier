@@ -1,6 +1,90 @@
 # data.management-nodejs-webhook
 
-Work in progress webhook sample
+[![Node.js](https://img.shields.io/badge/Node.js-4.4.3-blue.svg)](https://nodejs.org/)
+[![npm](https://img.shields.io/badge/npm-2.15.1-blue.svg)](https://www.npmjs.com/)
+![Platforms](https://img.shields.io/badge/platform-windows%20%7C%20osx%20%7C%20linux-lightgray.svg)
+[![License](http://img.shields.io/:license-mit-blue.svg)](http://opensource.org/licenses/MIT)
+ 
+[![OAuth2](https://img.shields.io/badge/OAuth2-v1-green.svg)](http://developer.autodesk.com/)
+[![Data-Management](https://img.shields.io/badge/Data%20Management-v2-green.svg)](http://developer.autodesk.com/)
+
+This sample application demonstrate Webhooks notifications for changes on **BIM 360 Docs**, **BIM 360 Team** (formerly A360) and **Fusion 360** to SMS, Email and chat bot.
+  
+### Thumbnail
+
+![](www/img/readme/indexpage.png)
+
+## Demonstration
+
+[See live here](http://bim360notifier.herokuapp.com).
+
+**Usage**: after sign in with your Autodesk account, (1) expand the tree to select a **folder**. Then (2), select the events to get notification. Finally, (3) enter a mobile phone number, and/or email address, and/or slack channel. Click on **Create notification**.
+
+## Setup
+
+This samples requires Forge credentials, Twilio, Postmark & Slack accounts.
+
+### Forge
+
+For using this sample, you need an Autodesk developer credentials. Visit the [Forge Developer Portal](https://developer.autodesk.com), sign up for an account, then [create an app](https://developer.autodesk.com/myapps/create). For this new app, use `https://localhost:3000/api/forge/callback/oauth` as Callback URL. Finally take note of the **Client ID** and **Client Secret**. For localhost testing:
+
+- FORGE\_CLIENT\_ID
+- FORGE\_CLIENT\_SECRET
+- FORGE\_CALLBACK\_URL (optional on localhost)
+
+### Twilio
+
+Create a [Twilio developer account](https://www.twilio.com). Create an phone number. Also, you will need the Account SID and Token. The following env vars are required:
+
+- TWILIO_ACCOUNT_SID
+- TWILIO_TOKEN
+- TWILIO_FROM_NUMBER
+
+### Postmark
+
+Create a [Postmark developer account](https://postmarkapp.com). Specify the **FROM** email, verify it. Take note of your Account ID. The following env vars are required:
+
+- POSTMARK_ACCOUNT_ID
+- POSTMARK_FROM_EMAIL
+
+### Slack
+
+Create an app for [Slack API](https://api.slack.com/). The following env vars are required:
+
+- 
+
+## Running locally
+
+Make sure to have [NodeJS](https://nodejs.org) installed. Clone this project or download it. It's recommended to install [GitHub desktop](https://desktop.github.com). To clone it via command line, use the following (Terminal on MacOSX/Linux, Git Shell on Windows):
+
+```
+git clone https://github.com/autodesk-forge/data.management-nodejs-webhook
+```
+
+Set all all environment variables described on the **Setup** section using the following:
+
+- Mac OSX/Linux (Terminal)
+
+```
+export VARIABLE_NAME=value
+```
+
+- Windows (use <b>Node.js command line</b> from Start menu)
+
+```
+set VARIABLE_NAME=value
+```
+
+Install the required packaged and run the application:
+
+```
+npm install
+npm run dev
+```
+
+Open the browser with SSL on [https://localhost:3000](https://localhost:3000)
+
+**Important:** do not use **npm start** locally, this is intended for PRODUCTION only with HTTPS (SSL) secure cookies.
 
 ## Deployment
 
@@ -15,3 +99,38 @@ To deploy this application to Heroku, the **Callback URL** for Forge and Storage
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 Watch [this video](https://www.youtube.com/watch?v=Oqa9O20Gj0c) on how deploy samples to Heroku.
+
+## Known issues
+
+BIM 360 Docs Hub names are comming with wrong formating, resulting in a wrong message. This issue is under investigation.
+
+## Tips & tricks
+
+For local development/testing, consider use [nodemon](https://www.npmjs.com/package/nodemon) package, which auto restart your node application after any modification on your code. To install it, use:
+
+    sudo npm install -g nodemon
+
+Then, instead of <b>npm run dev</b>, use the following:
+
+    npm run nodemon
+
+Which executes <b>nodemon server.js --ignore www/</b>, where the <b>--ignore</b> parameter indicates that the app should not restart if files under <b>www</b> folder are modified.
+
+## Troubleshooting
+
+After installing Github desktop for Windows, on the Git Shell, if you see a ***error setting certificate verify locations*** error, use the following:
+
+    git config --global http.sslverify "false"
+
+## License
+
+This sample is licensed under the terms of the [MIT License](http://opensource.org/licenses/MIT). Please see the [LICENSE](LICENSE) file for full details.
+
+
+## Authors
+
+Forge Partner Development Team
+
+- Augusto Goncalves [@augustomaia](https://twitter.com/augustomaia)
+
+See more at [Forge blog](https://forge.autodesk.com/blog).
