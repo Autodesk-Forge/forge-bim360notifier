@@ -7,6 +7,7 @@
  
 [![OAuth2](https://img.shields.io/badge/OAuth2-v1-green.svg)](http://developer.autodesk.com/)
 [![Data-Management](https://img.shields.io/badge/Data%20Management-v2-green.svg)](http://developer.autodesk.com/)
+[![Webhooks](https://img.shields.io/badge/Webhooks-v1-green.svg)](http://developer.autodesk.com/)
 
 This sample application demonstrate Webhooks notifications for changes on **BIM 360 Docs**, **BIM 360 Team** (formerly A360) and **Fusion 360** to SMS, Email and chat bot.
   
@@ -16,7 +17,7 @@ This sample application demonstrate Webhooks notifications for changes on **BIM 
 
 ## Demonstration
 
-[See live here](http://bim360notifier.herokuapp.com).
+Running [live here](http://bim360notifier.herokuapp.com) and [video demonstration here](https://www.youtube.com/watch?v=oZ_aNoBbpUM).
 
 **Usage**: after sign in with your Autodesk account, (1) expand the tree to select a **folder**. Then (2), select the events to get notification. Finally, (3) enter a mobile phone number, and/or email address, and/or slack channel. Click on **Create notification**.
 
@@ -36,22 +37,20 @@ For using this sample, you need an Autodesk developer credentials. Visit the [Fo
 
 Create a [Twilio developer account](https://www.twilio.com). Create an phone number. Also, you will need the Account SID and Token. The following env vars are required:
 
-- TWILIO_ACCOUNT_SID
-- TWILIO_TOKEN
-- TWILIO_FROM_NUMBER
+- TWILIO\_ACCOUNT_SID
+- TWILIO\_TOKEN
+- TWILIO\_FROM\_NUMBER
 
 ### Postmark
 
 Create a [Postmark developer account](https://postmarkapp.com). Specify the **FROM** email, verify it. Take note of your Account ID. The following env vars are required:
 
-- POSTMARK_ACCOUNT_ID
-- POSTMARK_FROM_EMAIL
+- POSTMARK\_ACCOUNT\_ID
+- POSTMARK\_FROM\_EMAIL
 
 ### Slack
 
-Create an app for [Slack API](https://api.slack.com/). The following env vars are required:
-
-- 
+Create an app for [Slack API](https://api.slack.com/) on your company account to handle **Incoming webhooks** [see more here](https://api.slack.com/incoming-webhooks). At the UI, enter the value in the form of *T00000000/B00000000/XXXXXXXXXXXXXXXX*
 
 ## Running locally
 
