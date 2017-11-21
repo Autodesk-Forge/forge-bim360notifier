@@ -17,7 +17,7 @@ This sample application demonstrate Webhooks notifications for changes on **BIM 
 
 ## Demonstration
 
-Running [live here](http://bim360notifier.herokuapp.com) and [video demonstration here](https://www.youtube.com/watch?v=oZ_aNoBbpUM).
+Running [live here](http://bim360notifier.autodesk.io) and [video demonstration here](https://www.youtube.com/watch?v=oZ_aNoBbpUM).
 
 **Usage**: after sign in with your Autodesk account, (1) expand the tree to select a **folder**. Then (2), select the events to get notification. Finally, (3) enter a mobile phone number, and/or email address, and/or slack channel. Click on **Create notification**.
 
