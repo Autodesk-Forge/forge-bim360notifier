@@ -23,7 +23,7 @@ Running [live here](http://bim360notifier.autodesk.io) and [video demonstration 
 
 ## Setup
 
-This samples requires Forge credentials, Twilio, Postmark & Slack accounts.
+This samples requires Forge credentials, Twilio, Postmark & Slack accounts. Create the following environment variables:
 
 ### Forge
 
@@ -32,6 +32,10 @@ For using this sample, you need an Autodesk developer credentials. Visit the [Fo
 - FORGE\_CLIENT\_ID
 - FORGE\_CLIENT\_SECRET
 - FORGE\_CALLBACK\_URL (optional on localhost)
+
+Now you need a local server to receive Webhook notifications, you can use ngrok as [described here](https://developer.autodesk.com/en/docs/webhooks/v1/tutorials/configuring-your-server/), then create a env var with the value (e.g. https://abc123.ngrok.io`)
+
+- FORGE\_HOOK\_CALLBACK\_HOST
 
 ### Twilio
 
