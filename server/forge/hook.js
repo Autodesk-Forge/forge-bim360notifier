@@ -103,14 +103,15 @@ router.get('/api/forge/hook/*', function (req, res) {
 });
 
 router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
+  // Best practice is to tell immediately that you got the call
+  // so return the HTTP call and proceed with the business logic
+  res.status(202).end();
+
   var hook = req.body.hook;
   var payload = req.body.payload;
 
   // check if the current event is one of the events to notifify
-  if (hook.hookAttribute.events.indexOf(hook.eventType) == -1) {
-    res.status(200).end();
-    return;
-  }
+  if (hook.hookAttribute.events.indexOf(hook.eventType) == -1) return;
 
   var eventParams = hook.eventType.split('.');
   var itemType = eventParams[1];
@@ -154,8 +155,6 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
       'body' : JSON.stringify({text: message})
     });
   }
-
-  res.status(200).end();
 });
 
 
