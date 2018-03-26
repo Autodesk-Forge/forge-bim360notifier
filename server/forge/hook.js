@@ -89,7 +89,7 @@ router.get('/api/forge/hook/*', function (req, res) {
     // get all evens for this folder
     var events = [];
     hooks.forEach(function (hook) {
-      events.push(hook.eventType);
+      events.push(hook.event);
     });
 
     //return to the UI
@@ -111,9 +111,9 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
   var payload = req.body.payload;
 
   // check if the current event is one of the events to notifify
-  if (hook.hookAttribute.events.indexOf(hook.eventType) == -1) return;
+  if (hook.hookAttribute.events.indexOf(hook.event) == -1) return;
 
-  var eventParams = hook.eventType.split('.');
+  var eventParams = hook.event.split('.');
   var itemType = eventParams[1];
   var eventName = eventParams[2];
 
@@ -127,7 +127,8 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
       to: hook.hookAttribute.sms,
       from: config.twilio.fromNumber
     }, function (err, result) {
-      console.log(hook.hookAttribute.sms + ': ' + message + ' => ' + result.status);
+      if (result!=undefined)
+        console.log(hook.hookAttribute.sms + ': ' + message + ' => ' + result.status);
     });
   }
 
@@ -187,7 +188,7 @@ WebHooks.prototype.GetHooks = function (callback) {
     }
 
     var list = JSON.parse(response.body);
-    list.forEach(function (hook) {
+    list.data.forEach(function (hook) {
       if (hook.scope.folder === self._folderId/* && hook.hookAttribute.events.indexOf(hook.eventType)>-1*/)
         hooks.push(hook);
     });
