@@ -11,7 +11,7 @@
     "cookie-session": "^2.0.0-beta.3",
     "express": "^4.16.2",
     "express-session": "^1.15.6",
-    "forge-apis": "^0.4.1",
+    "forge-apis": "^0.4.3",
     "intl-tel-input": "^12.1.2",
     "jquery": "^3.2.1",
     "jstree": "^3.3.4",
