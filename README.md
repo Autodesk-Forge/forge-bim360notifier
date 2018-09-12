@@ -13,7 +13,7 @@ This sample application demonstrate Webhooks notifications for changes on **BIM 
   
 ### Thumbnail
 
-![](www/img/readme/indexpage.png)
+![thumbnail](/thumbnail.png)
 
 ## Demonstration
 
