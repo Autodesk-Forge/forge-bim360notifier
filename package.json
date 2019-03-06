@@ -6,7 +6,7 @@
   "dependencies": {
     "async": "^2.5.0",
     "body-parser": "^1.18.2",
-    "bootstrap": "^3.3.7",
+    "bootstrap": "^3.4.1",
     "cookie-parser": "^1.4.3",
     "cookie-session": "^2.0.0-beta.3",
     "express": "^4.16.2",
@@ -14,7 +14,7 @@
     "forge-apis": "^0.4.3",
     "intl-tel-input": "^12.1.2",
     "jquery": "^3.2.1",
-    "jstree": "^3.3.4",
+    "jstree": "^3.3.7",
     "moment": "^2.19.1",
     "node-html-encoder": "0.0.2",
     "postmark": "^1.4.1",
