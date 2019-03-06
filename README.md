@@ -35,7 +35,7 @@ For using this sample, you need an Autodesk developer credentials. Visit the [Fo
 
 Now you need a local server to receive Webhook notifications, you can use ngrok as [described here](https://developer.autodesk.com/en/docs/webhooks/v1/tutorials/configuring-your-server/), then create a env var with the value (e.g. https://abc123.ngrok.io`)
 
-- FORGE\_HOOK\_CALLBACK\_HOST
+- FORGE\_WEBHOOK\_URL
 
 ### Twilio
 
