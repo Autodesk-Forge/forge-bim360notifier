@@ -31,7 +31,7 @@ module.exports = {
       client_secret: process.env.FORGE_CLIENT_SECRET || '<replace with your consumer secret>'
     },
 
-    hookCallbackHost : process.env.FORGE_HOOK_CALLBACK_HOST
+    hookCallbackHost : process.env.FORGE_WEBHOOK_URL
   },
 
   twilio: {
