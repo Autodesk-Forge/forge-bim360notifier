@@ -36,11 +36,11 @@ Create the following environment variables:
 
 ### Forge
 
-For using this sample, you need an Autodesk developer credentials. Visit the [Forge Developer Portal](https://developer.autodesk.com), sign up for an account, then [create an app](https://developer.autodesk.com/myapps/create). For this new app, use `https://localhost:3000/api/forge/callback/oauth` as Callback URL. Finally take note of the **Client ID** and **Client Secret**. For localhost testing:
+For using this sample, you need an Autodesk developer credentials. Visit the [Forge Developer Portal](https://developer.autodesk.com), sign up for an account, then [create an app](https://developer.autodesk.com/myapps/create). For this new app, use `http://localhost:3000/api/forge/callback/oauth` as Callback URL. Finally take note of the **Client ID** and **Client Secret**. For localhost testing:
 
 - FORGE\_CLIENT\_ID and set it to above-mentioned **Client ID**
 - FORGE\_CLIENT\_SECRET and set it to above-mentioned **Client Secret**
-- FORGE\_CALLBACK\_URL and set it to `https://localhost:3000/api/forge/callback/oauth`
+- FORGE\_CALLBACK\_URL and set it to `http://localhost:3000/api/forge/callback/oauth`
 
 Now you need a local server to receive Webhook notifications, you can use ngrok as [described here](https://developer.autodesk.com/en/docs/webhooks/v1/tutorials/configuring-your-server/), then create a env var with the value (e.g. https://abc123.ngrok.io`)
 
@@ -94,7 +94,7 @@ npm install
 npm run dev
 ```
 
-Open the browser with SSL on [https://localhost:3000](https://localhost:3000)
+Open the browser and go to [http://localhost:3000](http://localhost:3000).
 
 **Important:** do not use **npm start** locally, this is intended for PRODUCTION only with HTTPS (SSL) secure cookies.
 
