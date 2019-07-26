@@ -17,7 +17,7 @@
     "jstree": "^3.3.7",
     "moment": "^2.19.1",
     "node-html-encoder": "0.0.2",
-    "postmark": "^1.4.1",
+    "postmark": "^2.2.8",
     "request": "^2.83.0",
     "twilio": "^3.9.0"
   },
