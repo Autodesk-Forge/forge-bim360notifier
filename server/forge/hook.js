@@ -45,7 +45,7 @@ router.post('/api/forge/hook', jsonParser, function (req, res) {
   var sms = req.body.sms;
   var email = req.body.email;
   var slack = req.body.slack;
-  if (!sms && !email && !slack) {
+  if (events.length > 0 && !sms && !email && !slack) {
     res.status(400).end();
     return;
   }
@@ -92,6 +92,10 @@ router.get('/api/forge/hook/*', function (req, res) {
       events.push(hook.event);
     });
 
+    if (hooks[0].hookAttribute === undefined) {
+      hooks[0].hookAttribute = {};
+    }
+
     //return to the UI
     res.status(200).json({
       sms: hooks[0].hookAttribute.sms,    // all events should have the same sms & email (for this app)
@@ -127,7 +131,7 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
       to: hook.hookAttribute.sms,
       from: config.twilio.fromNumber
     }, function (err, result) {
-      if (result!=undefined)
+      if (result != undefined)
         console.log(hook.hookAttribute.sms + ': ' + message + ' => ' + result.status);
     });
   }
@@ -149,11 +153,11 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
   }
 
   // slack notification
-  if (hook.hookAttribute.slack){
+  if (hook.hookAttribute.slack) {
     request.post({
-      'url' : 'https://hooks.slack.com/services/' + hook.hookAttribute.slack,
+      'url': 'https://hooks.slack.com/services/' + hook.hookAttribute.slack,
       'Content-Type': 'application/json',
-      'body' : JSON.stringify({text: message})
+      'body': JSON.stringify({ text: message })
     });
   }
 });
@@ -177,7 +181,8 @@ WebHooks.prototype.GetHooks = function (callback) {
     //url : 'https://developer.api.autodesk.com/webhooks/v1/systems/data/events/fs.file.added/hooks',
     url: this._url + '/hooks',
     headers: {
-      'Authorization': 'Bearer ' + this._accessToken
+      'Authorization': 'Bearer ' + this._accessToken,
+      'x-ads-region': (self._folderId.indexOf('wipemea') > 0 ? 'EMEA' : 'US')
     }
   }, function (error, response) {
     var hooks = [];
@@ -207,7 +212,8 @@ WebHooks.prototype.DeleteHooks = function (callback) {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + self._accessToken
+            'Authorization': 'Bearer ' + self._accessToken,
+            'x-ads-region': (self._folderId.indexOf('wipemea') > 0 ? 'EMEA' : 'US')
           }
         }, function (error, response) {
           callback(null, (response.status == 24 ? hook.eventType : null));
@@ -251,13 +257,15 @@ WebHooks.prototype.CreateHook = function (attributes, callback) {
   var createEvents = [];
   var events = attributes.events.split(',');
   events.forEach(function (event) {
+    if (event === '') return;
     createEvents.push(function (callback) {
       request({
         url: self._url + '/events/' + event + '/hooks',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + self._accessToken
+          'Authorization': 'Bearer ' + self._accessToken,
+          'x-ads-region': (self._folderId.indexOf('wipemea') > 0 ? 'EMEA' : 'US')
         },
         body: JSON.stringify(requestBody)
       }, function (error, response) {
@@ -266,7 +274,7 @@ WebHooks.prototype.CreateHook = function (attributes, callback) {
     })
   })
 
-  // process all delete calls in parallel
+  // process all create calls in parallel
   async.parallel(createEvents, function (err, results) {
     callback(results);
   })
