@@ -38,6 +38,7 @@ var hookCallbackEntpoint = '/api/forge/hook/callback';
 router.post('/api/forge/hook', jsonParser, function (req, res) {
   // session with access token
   var token = new Credentials(req.session);
+
   var events = req.body.events;
   var folderHttp = req.body.folderId;
 
@@ -64,12 +65,26 @@ router.post('/api/forge/hook', jsonParser, function (req, res) {
   if (email) attributes['email'] = email;
   if (slack) attributes['slack'] = slack;
 
-  var hooks = new WebHooks(token.getForgeCredentials().access_token, folderId);
-
-  hooks.DeleteHooks(function () {
-    hooks.CreateHook(attributes, function (status) {
-      res.status(200).json(status);
-    })
+  request.post("https://developer.api.autodesk.com/authentication/v1/authenticate", 
+  function (error, response) {
+    var tokenInfo = JSON.parse(response.body);
+    var access_token = tokenInfo.access_token;
+    console.log(access_token);
+    var hooks = new WebHooks(access_token, folderId);
+    console.log(attributes);
+    hooks.DeleteHooks(function () {
+      hooks.CreateHook(attributes, function (status) {
+        console.log("It works!");
+        console.log(status);
+        res.status(200).json(status);
+      })
+    });
+    }
+).form({
+    client_id: config.forge.credentials.client_id, 
+    client_secret: config.forge.credentials.client_secret,
+    grant_type: 'client_credentials',
+    scope: 'data:read'
   });
 });
 
@@ -121,8 +136,48 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
   var itemType = eventParams[1];
   var eventName = eventParams[2];
 
-  var message = 'BIM360 Notifier: ' + itemType + ' ' + payload.name + ' was ' + eventName + ' on project ' + payload.ancestors[1].name;
+  if(hook.event === "model.sync") {
 
+    var stateString = 'started';
+    if(payload.state === 'SYNC_COMPLETE')
+    {
+      stateString = 'completed';
+    }
+    request.post("https://developer.api.autodesk.com/authentication/v1/authenticate", 
+    function (tokenErr, tokenResponse) {
+      var tokenInfo = JSON.parse(tokenResponse.body);
+      var access_token = tokenInfo.access_token;
+        request({
+          url: 'https://developer.api.autodesk.com/data/v1/projects/' + payload.projectId + '/items/' + req.body.resourceUrn,
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + access_token
+          }
+        }, function (nameError, nameResponse) {
+          console.log(nameResponse.body)
+          var data = JSON.parse(nameResponse.body);
+          var name = data.data.attributes.displayName
+          var syncMessage = 'BIM360 Notifier: Model Sync was ' + stateString + ' on model ' + name;
+          sendMessage(hook, syncMessage);
+        });
+      }
+  ).form({
+      client_id: config.forge.credentials.client_id, 
+      client_secret: config.forge.credentials.client_secret,
+      grant_type: 'client_credentials',
+      scope: 'data:read'
+    });
+
+  }
+  else{
+    var normalMessage = 'BIM360 Notifier: ' + itemType + ' ' + payload.name + ' was ' + eventName + ' on project ' + payload.ancestors[1].name
+    sendMessage(hook, normalMessage);
+  }
+});
+
+function sendMessage(hook, message)
+{
   // SMS Notification
   if (hook.hookAttribute.sms && config.twilio.credentials.accountSid) {
     var client = new twilio(config.twilio.credentials.accountSid, config.twilio.credentials.token);
@@ -160,7 +215,7 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
       'body': JSON.stringify({ text: message })
     });
   }
-});
+}
 
 
 // *****************************
@@ -171,7 +226,9 @@ function WebHooks(accessToken, folderId) {
   this._accessToken = accessToken;
   this._folderId = folderId;
 
-  this._url = 'https://developer.api.autodesk.com/webhooks/v1/systems/data';
+  this._url = 'https://developer.api.autodesk.com/webhooks/v1/systems/';
+  this._dataSystem = 'data';
+  this._c4rSystem = 'adsk.c4r';
 }
 
 WebHooks.prototype.GetHooks = function (callback) {
@@ -208,7 +265,7 @@ WebHooks.prototype.DeleteHooks = function (callback) {
     hooks.forEach(function (hook) {
       deleteRequests.push(function (callback) {
         request({
-          url: self._url + '/events/' + hook.eventType + '/hooks/' + hook.hookId,
+          url: self._url + hook.system + '/events/' + hook.eventType + '/hooks/' + hook.hookId,
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -255,12 +312,19 @@ WebHooks.prototype.CreateHook = function (attributes, callback) {
 
   var self = this;
   var createEvents = [];
+  console.log(attributes.events);
   var events = attributes.events.split(',');
-  events.forEach(function (event) {
-    if (event === '') return;
+  events.forEach(function (eventData) {
+    if (eventData === '') return;
+    var eventDataArray = eventData.split('|');
+    var eventSystem = eventDataArray[0]
+    var event = eventDataArray[1];
+    var url = self._url + eventSystem + '/events/' + event + '/hooks';
+    console.log(url);
+
     createEvents.push(function (callback) {
       request({
-        url: self._url + '/events/' + event + '/hooks',
+        url: url,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -269,6 +333,7 @@ WebHooks.prototype.CreateHook = function (attributes, callback) {
         },
         body: JSON.stringify(requestBody)
       }, function (error, response) {
+        console.log(response.body);
         callback(null, (response.statusCode == 201 ? event : null));
       });
     })
