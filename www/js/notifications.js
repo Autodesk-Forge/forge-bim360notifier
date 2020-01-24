@@ -72,12 +72,6 @@ function showEvents(folderId) {
             $(this).addClass(' list-group-item-primary active');
             $(this).find('span').removeClass(' glyphicon-unchecked').addClass(' glyphicon-check')
           }
-          else
-          {
-            console.log("not checking");
-            console.log(this.id);
-            console.log(hook.events);
-          }
         });
       });
       if (hook.sms) $('#phone').intlTelInput("setNumber",hook.sms);

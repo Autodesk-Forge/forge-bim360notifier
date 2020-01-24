@@ -38,7 +38,6 @@ var hookCallbackEntpoint = '/api/forge/hook/callback';
 router.post('/api/forge/hook', jsonParser, function (req, res) {
   // session with access token
   var token = new Credentials(req.session);
-
   var events = req.body.events;
   var folderHttp = req.body.folderId;
 
@@ -90,14 +89,14 @@ router.get('/api/forge/hook/*', function (req, res) {
   Get2LegggedToken(function(two_legged_access_token){
     var hooks = new WebHooks(two_legged_access_token, token.getForgeCredentials().access_token, folderId);
 
-    hooks.GetHooks(function (hooks, hooks3lo) {
-      if (hooks.length == 0 && hooks3lo.length == 0) {
+    hooks.GetHooks(function (hooks2lo, hooks3lo) {
+      if (hooks2lo.length == 0 && hooks3lo.length == 0) {
         res.status(204).end();
         return;
       }
 
       var allHooks  = [];
-      hooks.forEach(function (hook){
+      hooks2lo.forEach(function (hook){
         allHooks.push(hook);
       });
 
@@ -252,14 +251,14 @@ WebHooks.prototype.GetHooks = function (callback) {
     }
   }, function (error, response) {
 
-    var hooks = [];
+    var hooks2lo = [];
     var hooks3lo = [];
     if (response.statusCode == 200) {
       var list = JSON.parse(response.body);
       list.data.forEach(function (hook) {
         if (hook.scope.folder === self._folderId/* && hook.hookAttribute.events.indexOf(hook.eventType)>-1*/)
         {
-          hooks.push(hook);
+          hooks2lo.push(hook);
         }
 
       });
@@ -274,7 +273,7 @@ WebHooks.prototype.GetHooks = function (callback) {
       }
     }, function (error3lo, response3lo) {
       if (response3lo.statusCode != 200) {
-        callback(hooks, hooks3lo);
+        callback(hooks2lo, hooks3lo);
         return;
       }
 
@@ -286,7 +285,7 @@ WebHooks.prototype.GetHooks = function (callback) {
 
         }
       });
-      callback(hooks, hooks3lo);
+      callback(hooks2lo, hooks3lo);
     });
   });
 };
