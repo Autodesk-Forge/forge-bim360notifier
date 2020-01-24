@@ -140,7 +140,7 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
   var itemType = eventParams[1];
   var eventName = eventParams[2];
 
-  if(hook.system === "adsk.c4r"){
+  if(hook.system === 'adsk.c4r'){
     var message = '';
     var stateString = '';
     var operationString = '';
@@ -230,7 +230,7 @@ function sendMessage(hook, message)
 
 function Get2LegggedToken(callback)
 {
-    request.post("https://developer.api.autodesk.com/authentication/v1/authenticate", 
+    request.post('https://developer.api.autodesk.com/authentication/v1/authenticate', 
       function (error, response) {
         var access_token = JSON.parse(response.body).access_token;
         callback(access_token);
@@ -384,7 +384,7 @@ WebHooks.prototype.CreateHook = function (attributes, callback) {
     var event = eventDataArray[1];
 
     var token = self._threeLeggedAccessToken;
-    if(eventSystem === "adsk.c4r")
+    if(eventSystem === 'adsk.c4r')
     {
       token = self._twoLeggedAccessToken;
     }
