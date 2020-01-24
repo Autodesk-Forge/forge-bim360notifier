@@ -69,13 +69,9 @@ router.post('/api/forge/hook', jsonParser, function (req, res) {
   function (error, response) {
     var tokenInfo = JSON.parse(response.body);
     var access_token = tokenInfo.access_token;
-    console.log(access_token);
     var hooks = new WebHooks(access_token, folderId);
-    console.log(attributes);
     hooks.DeleteHooks(function () {
       hooks.CreateHook(attributes, function (status) {
-        console.log("It works!");
-        console.log(status);
         res.status(200).json(status);
       })
     });
@@ -155,7 +151,6 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
             'Authorization': 'Bearer ' + access_token
           }
         }, function (nameError, nameResponse) {
-          console.log(nameResponse.body)
           var data = JSON.parse(nameResponse.body);
           var name = data.data.attributes.displayName
           var syncMessage = 'BIM360 Notifier: Model Sync was ' + stateString + ' on model ' + name;
@@ -226,9 +221,7 @@ function WebHooks(accessToken, folderId) {
   this._accessToken = accessToken;
   this._folderId = folderId;
 
-  this._url = 'https://developer.api.autodesk.com/webhooks/v1/systems/';
-  this._dataSystem = 'data';
-  this._c4rSystem = 'adsk.c4r';
+  this._url = 'https://developer.api.autodesk.com/webhooks/v1/';
 }
 
 WebHooks.prototype.GetHooks = function (callback) {
@@ -265,7 +258,7 @@ WebHooks.prototype.DeleteHooks = function (callback) {
     hooks.forEach(function (hook) {
       deleteRequests.push(function (callback) {
         request({
-          url: self._url + hook.system + '/events/' + hook.eventType + '/hooks/' + hook.hookId,
+          url: self._url + 'systems/' +  hook.system + '/events/' + hook.eventType + '/hooks/' + hook.hookId,
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -312,19 +305,16 @@ WebHooks.prototype.CreateHook = function (attributes, callback) {
 
   var self = this;
   var createEvents = [];
-  console.log(attributes.events);
   var events = attributes.events.split(',');
   events.forEach(function (eventData) {
     if (eventData === '') return;
     var eventDataArray = eventData.split('|');
     var eventSystem = eventDataArray[0]
     var event = eventDataArray[1];
-    var url = self._url + eventSystem + '/events/' + event + '/hooks';
-    console.log(url);
 
     createEvents.push(function (callback) {
       request({
-        url: url,
+        url: self._url + 'systems/' + eventSystem + '/events/' + event + '/hooks',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -333,7 +323,6 @@ WebHooks.prototype.CreateHook = function (attributes, callback) {
         },
         body: JSON.stringify(requestBody)
       }, function (error, response) {
-        console.log(response.body);
         callback(null, (response.statusCode == 201 ? event : null));
       });
     })
