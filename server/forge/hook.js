@@ -140,12 +140,28 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
   var itemType = eventParams[1];
   var eventName = eventParams[2];
 
-  if(hook.event === "model.sync") {
-
-    var stateString = 'started';
-    if(payload.state === 'SYNC_COMPLETE')
-    {
+  if(hook.system === "adsk.c4r"){
+    var message = '';
+    var stateString = '';
+    var operationString = '';
+    if(payload.state === 'SYNC_COMPLETE') {
       stateString = 'completed';
+    }
+    else if(payload.state === 'SYNC_START') {
+      stateString = 'started';
+    }
+    else if (payload.state === 'PUBLISHING_PENDING') {
+      stateString = 'pending';
+    }
+    else if (payload.state === 'PUBLISHING_IN_PROGRESS') {
+      stateString = 'in progress'
+    }
+
+    if(hook.event === 'model.sync') {
+        operationString = 'sync';
+    }
+    else {
+       operationString  = 'publish'
     }
 
     Get2LegggedToken(function(access_token) {
@@ -160,14 +176,14 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
         }, function (nameError, nameResponse) {
           var data = JSON.parse(nameResponse.body);
           var name = data.data.attributes.displayName
-          var syncMessage = 'BIM360 Notifier: Model Sync was ' + stateString + ' on model ' + name;
-          sendMessage(hook, syncMessage);
+          var message = 'BIM360 Notifier: Model ' + operationString +  ' ' + stateString + ' on model ' + name;
+          sendMessage(hook, message);
         });
     });
   }
   else{
-    var normalMessage = 'BIM360 Notifier: ' + itemType + ' ' + payload.name + ' was ' + eventName + ' on project ' + payload.ancestors[1].name
-    sendMessage(hook, normalMessage);
+    var message = 'BIM360 Notifier: ' + itemType + ' ' + payload.name + ' was ' + eventName + ' on project ' + payload.ancestors[1].name
+    sendMessage(hook, message);
   }
 });
 
