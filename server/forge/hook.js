@@ -64,44 +64,63 @@ router.post('/api/forge/hook', jsonParser, function (req, res) {
   if (email) attributes['email'] = email;
   if (slack) attributes['slack'] = slack;
 
-  var hooks = new WebHooks(token.getForgeCredentials().access_token, folderId);
-
-  hooks.DeleteHooks(function () {
-    hooks.CreateHook(attributes, function (status) {
+  Get2LegggedToken(function(two_legged_access_token){
+    DeleteAndCreateHooks(two_legged_access_token, token.getForgeCredentials().access_token, folderId, attributes, function(status){
       res.status(200).json(status);
-    })
+    });
   });
 });
+
+function DeleteAndCreateHooks(two_legged_access_token, three_legged_access_token, folderId, attributes, callback)
+{
+    var hooks = new WebHooks(two_legged_access_token, three_legged_access_token, folderId);
+    hooks.DeleteHooks(function () {
+      hooks.CreateHook(attributes, function (status) {
+        callback(status);
+      })
+    });
+}
 
 router.get('/api/forge/hook/*', function (req, res) {
   var params = req.url.split('/');
   var folderId = params[params.length - 1];
 
   var token = new Credentials(req.session);
-  var hooks = new WebHooks(token.getForgeCredentials().access_token, folderId);
+  Get2LegggedToken(function(two_legged_access_token){
+    var hooks = new WebHooks(two_legged_access_token, token.getForgeCredentials().access_token, folderId);
 
-  hooks.GetHooks(function (hooks) {
-    if (hooks.length == 0) {
-      res.status(204).end();
-      return;
-    }
+    hooks.GetHooks(function (hooks2lo, hooks3lo) {
+      if (hooks2lo.length == 0 && hooks3lo.length == 0) {
+        res.status(204).end();
+        return;
+      }
 
-    // get all evens for this folder
-    var events = [];
-    hooks.forEach(function (hook) {
-      events.push(hook.event);
-    });
+      var allHooks  = [];
+      hooks2lo.forEach(function (hook){
+        allHooks.push(hook);
+      });
 
-    if (hooks[0].hookAttribute === undefined) {
-      hooks[0].hookAttribute = {};
-    }
+      hooks3lo.forEach(function (hook){
+        allHooks.push(hook);
+      })
 
-    //return to the UI
-    res.status(200).json({
-      sms: hooks[0].hookAttribute.sms,    // all events should have the same sms & email (for this app)
-      email: hooks[0].hookAttribute.email,
-      slack: hooks[0].hookAttribute.slack,
-      events: events
+      // get all evens for this folder
+      var events = [];
+      allHooks.forEach(function (hook) {
+        events.push(hook.system + '|' + hook.event);
+      });
+
+      if (allHooks[0].hookAttribute === undefined) {
+        allHooks[0].hookAttribute = {};
+      }
+
+      //return to the UI
+      res.status(200).json({
+        sms: allHooks[0].hookAttribute.sms,    // all events should have the same sms & email (for this app)
+        email: allHooks[0].hookAttribute.email,
+        slack: allHooks[0].hookAttribute.slack,
+        events: events
+      });
     });
   });
 });
@@ -121,8 +140,55 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
   var itemType = eventParams[1];
   var eventName = eventParams[2];
 
-  var message = 'BIM360 Notifier: ' + itemType + ' ' + payload.name + ' was ' + eventName + ' on project ' + payload.ancestors[1].name;
+  if(hook.system === 'adsk.c4r'){
+    var message = '';
+    var stateString = '';
+    var operationString = '';
+    if(payload.state === 'SYNC_COMPLETE') {
+      stateString = 'completed';
+    }
+    else if(payload.state === 'SYNC_START') {
+      stateString = 'started';
+    }
+    else if (payload.state === 'PUBLISHING_PENDING') {
+      stateString = 'pending';
+    }
+    else if (payload.state === 'PUBLISHING_IN_PROGRESS') {
+      stateString = 'in progress'
+    }
 
+    if(hook.event === 'model.sync') {
+        operationString = 'sync';
+    }
+    else {
+       operationString  = 'publish'
+    }
+
+    Get2LegggedToken(function(access_token) {
+        request({
+          url: 'https://developer.api.autodesk.com/data/v1/projects/' + payload.projectId + '/items/' + req.body.resourceUrn,
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + access_token,
+            'x-ads-region': (hook.scope.folder.indexOf('wipemea') > 0 ? 'EMEA' : 'US')
+          }
+        }, function (nameError, nameResponse) {
+          var data = JSON.parse(nameResponse.body);
+          var name = data.data.attributes.displayName
+          var message = 'BIM360 Notifier: Model ' + operationString +  ' ' + stateString + ' on model ' + name;
+          sendMessage(hook, message);
+        });
+    });
+  }
+  else{
+    var message = 'BIM360 Notifier: ' + itemType + ' ' + payload.name + ' was ' + eventName + ' on project ' + payload.ancestors[1].name
+    sendMessage(hook, message);
+  }
+});
+
+function sendMessage(hook, message)
+{
   // SMS Notification
   if (hook.hookAttribute.sms && config.twilio.credentials.accountSid) {
     var client = new twilio(config.twilio.credentials.accountSid, config.twilio.credentials.token);
@@ -160,18 +226,33 @@ router.post(hookCallbackEntpoint, jsonParser, function (req, res) {
       'body': JSON.stringify({ text: message })
     });
   }
-});
+}
 
+function Get2LegggedToken(callback)
+{
+    request.post('https://developer.api.autodesk.com/authentication/v1/authenticate', 
+      function (error, response) {
+        var access_token = JSON.parse(response.body).access_token;
+        callback(access_token);
+      }
+    ).form({
+      client_id: config.forge.credentials.client_id, 
+      client_secret: config.forge.credentials.client_secret,
+      grant_type: 'client_credentials',
+      scope: 'data:read'
+    });
+}
 
 // *****************************
 // WebHook endpoints wrapper
 // *****************************
 
-function WebHooks(accessToken, folderId) {
-  this._accessToken = accessToken;
+function WebHooks(twoLeggedaccessToken, threeLeggedAccessToken, folderId) {
+  this._twoLeggedAccessToken = twoLeggedaccessToken;
+  this._threeLeggedAccessToken = threeLeggedAccessToken;
   this._folderId = folderId;
 
-  this._url = 'https://developer.api.autodesk.com/webhooks/v1/systems/data';
+  this._url = 'https://developer.api.autodesk.com/webhooks/v1/';
 }
 
 WebHooks.prototype.GetHooks = function (callback) {
@@ -179,40 +260,80 @@ WebHooks.prototype.GetHooks = function (callback) {
   var self = this;
   request.get({
     //url : 'https://developer.api.autodesk.com/webhooks/v1/systems/data/events/fs.file.added/hooks',
-    url: this._url + '/hooks',
+    url: self._url + '/hooks',
     headers: {
-      'Authorization': 'Bearer ' + this._accessToken,
+      'Authorization': 'Bearer ' + self._twoLeggedAccessToken,
       'x-ads-region': (self._folderId.indexOf('wipemea') > 0 ? 'EMEA' : 'US')
     }
   }, function (error, response) {
-    var hooks = [];
 
-    if (response.statusCode != 200) {
-      callback(hooks);
-      return;
+    var hooks2lo = [];
+    var hooks3lo = [];
+    if (response.statusCode == 200) {
+      var list = JSON.parse(response.body);
+      list.data.forEach(function (hook) {
+        if (hook.scope.folder === self._folderId/* && hook.hookAttribute.events.indexOf(hook.eventType)>-1*/)
+        {
+          hooks2lo.push(hook);
+        }
+
+      });
     }
 
-    var list = JSON.parse(response.body);
-    list.data.forEach(function (hook) {
-      if (hook.scope.folder === self._folderId/* && hook.hookAttribute.events.indexOf(hook.eventType)>-1*/)
-        hooks.push(hook);
+    request.get({
+      //url : 'https://developer.api.autodesk.com/webhooks/v1/systems/data/events/fs.file.added/hooks',
+      url: self._url + '/hooks',
+      headers: {
+        'Authorization': 'Bearer ' + self._threeLeggedAccessToken,
+        'x-ads-region': (self._folderId.indexOf('wipemea') > 0 ? 'EMEA' : 'US')
+      }
+    }, function (error3lo, response3lo) {
+      if (response3lo.statusCode != 200) {
+        callback(hooks2lo, hooks3lo);
+        return;
+      }
+
+      list = JSON.parse(response3lo.body);
+      list.data.forEach(function (hook) {
+        if (hook.scope.folder === self._folderId/* && hook.hookAttribute.events.indexOf(hook.eventType)>-1*/)
+        {
+          hooks3lo.push(hook);
+
+        }
+      });
+      callback(hooks2lo, hooks3lo);
     });
-    callback(hooks);
   });
 };
 
 WebHooks.prototype.DeleteHooks = function (callback) {
   var self = this;
-  this.GetHooks(function (hooks) {
+  this.GetHooks(function (hooks2lo, hooks3lo) {
     var deleteRequests = [];
-    hooks.forEach(function (hook) {
+    hooks2lo.forEach(function (hook) {
       deleteRequests.push(function (callback) {
         request({
-          url: self._url + '/events/' + hook.eventType + '/hooks/' + hook.hookId,
+          url: self._url + 'systems/' +  hook.system + '/events/' + hook.eventType + '/hooks/' + hook.hookId,
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + self._accessToken,
+            'Authorization': 'Bearer ' + self._twoLeggedAccessToken,
+            'x-ads-region': (self._folderId.indexOf('wipemea') > 0 ? 'EMEA' : 'US')
+          }
+        }, function (error, response) {
+          callback(null, (response.status == 24 ? hook.eventType : null));
+        });
+      })
+    });
+
+    hooks3lo.forEach(function (hook) {
+      deleteRequests.push(function (callback) {
+        request({
+          url: self._url + 'systems/' +  hook.system + '/events/' + hook.eventType + '/hooks/' + hook.hookId,
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + self._threeLeggedAccessToken,
             'x-ads-region': (self._folderId.indexOf('wipemea') > 0 ? 'EMEA' : 'US')
           }
         }, function (error, response) {
@@ -256,15 +377,25 @@ WebHooks.prototype.CreateHook = function (attributes, callback) {
   var self = this;
   var createEvents = [];
   var events = attributes.events.split(',');
-  events.forEach(function (event) {
-    if (event === '') return;
+  events.forEach(function (eventData) {
+    if (eventData === '') return;
+    var eventDataArray = eventData.split('|');
+    var eventSystem = eventDataArray[0]
+    var event = eventDataArray[1];
+
+    var token = self._threeLeggedAccessToken;
+    if(eventSystem === 'adsk.c4r')
+    {
+      token = self._twoLeggedAccessToken;
+    }
+
     createEvents.push(function (callback) {
       request({
-        url: self._url + '/events/' + event + '/hooks',
+        url: self._url + 'systems/' + eventSystem + '/events/' + event + '/hooks',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + self._accessToken,
+          'Authorization': 'Bearer ' + token,
           'x-ads-region': (self._folderId.indexOf('wipemea') > 0 ? 'EMEA' : 'US')
         },
         body: JSON.stringify(requestBody)
